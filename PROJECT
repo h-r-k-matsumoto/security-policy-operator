@@ -1,0 +1,7 @@
+version: "2"
+domain: matsumo.dev
+repo: _/Users/hiroki-matsumoto/Dev/go/src/github.com/h-r-k-matsumoto/security-policy-operator
+resources:
+- group: cloudarmor
+  version: v1beta1
+  kind: SecurityPolicy

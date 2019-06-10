@@ -1,0 +1,7 @@
+apiVersion: cloudarmor.matsumo.dev/v1beta1
+kind: SecurityPolicy
+metadata:
+  name: securitypolicy-sample
+spec:
+  # Add fields here
+  foo: bar
