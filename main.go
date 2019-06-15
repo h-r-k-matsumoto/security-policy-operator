@@ -19,8 +19,8 @@ import (
 	"flag"
 	"os"
 
-	cloudarmorv1beta1 "_/Users/hiroki-matsumoto/Dev/go/src/github.com/h-r-k-matsumoto/security-policy-operator/api/v1beta1"
-	"_/Users/hiroki-matsumoto/Dev/go/src/github.com/h-r-k-matsumoto/security-policy-operator/controllers"
+	cloudarmorv1beta1 "github.com/h-r-k-matsumoto/security-policy-operator/api/v1beta1"
+	"github.com/h-r-k-matsumoto/security-policy-operator/controllers"
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"

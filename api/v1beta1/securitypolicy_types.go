@@ -19,19 +19,28 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+// SecurityPolicySpecRule defines rules
+type SecurityPolicySpecRule struct {
+	Action      string   `json:"action"`
+	Description string   `json:"description"`
+	Priority    int64    `json:"priority"`
+	SrcIpRanges []string `json:"srcIpRanges"`
+}
 
 // SecurityPolicySpec defines the desired state of SecurityPolicy
 type SecurityPolicySpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// +kubebuilder:validation:MinLength=1
+	Name          string                   `json:"name"`
+	Description   string                   `json:"description"`
+	DefaultAction string                   `json:"defaultAction"`
+	Rules         []SecurityPolicySpecRule `json:"rules"`
 }
 
 // SecurityPolicyStatus defines the observed state of SecurityPolicy
 type SecurityPolicyStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// +kubebuilder:validation:MinLength=1
+	Description string                   `json:"description"`
+	Rules       []SecurityPolicySpecRule `json:"rules"`
 }
 
 // +kubebuilder:object:root=true
