@@ -385,6 +385,8 @@ spec:
           type: object
         spec:
           properties:
+            defaultAction:
+              type: string
             description:
               type: string
             name:
@@ -414,37 +416,10 @@ spec:
           required:
           - name
           - description
+          - defaultAction
           - rules
           type: object
         status:
-          properties:
-            description:
-              minLength: 1
-              type: string
-            rules:
-              items:
-                properties:
-                  action:
-                    type: string
-                  description:
-                    type: string
-                  priority:
-                    format: int64
-                    type: integer
-                  srcIpRanges:
-                    items:
-                      type: string
-                    type: array
-                required:
-                - action
-                - description
-                - priority
-                - srcIpRanges
-                type: object
-              type: array
-          required:
-          - description
-          - rules
           type: object
       type: object
   versions:

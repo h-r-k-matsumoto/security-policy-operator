@@ -17,12 +17,12 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-logr/logr"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	cloudarmorv1beta1 "github.com/h-r-k-matsumoto/security-policy-operator/api/v1beta1"
 )
@@ -51,24 +51,45 @@ func (r *SecurityPolicyReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 		return ctrl.Result{}, err
 	}
 
+	myFinalizerName := "securitypolicy.finalizer.cloudarmor.matsumo.dev"
+
 	if !instance.ObjectMeta.DeletionTimestamp.IsZero() {
 		log.Info("delete object.")
-		// The object is being deleted
-		// add finializer logic.
+		if containsString(instance.ObjectMeta.Finalizers, myFinalizerName) {
+			// our finalizer is present, so lets handle our external dependency
+			if err := r.deleteExternalDependency(instance); err != nil {
+				return reconcile.Result{}, err
+			}
+			// remove our finalizer from the list and update it.
+			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, myFinalizerName)
+			if err := r.Update(context.Background(), instance); err != nil {
+				return reconcile.Result{}, err
+			}
+		}
 		return ctrl.Result{}, nil
 	}
 
-	api := SecurityPolicyAPI{}
-	gcp_instance, err := api.Get(ctx, instance.Spec.Name)
-	log.Info("====================")
-	log.Info(fmt.Sprintf("%v", gcp_instance))
-	log.Info("====================")
-	if gcp_instance == nil {
-		_, err := api.Create(ctx, &instance.Spec)
-		if err != nil {
-			log.Error(err, "error")
+	if !containsString(instance.ObjectMeta.Finalizers, myFinalizerName) {
+		instance.ObjectMeta.Finalizers = append(instance.ObjectMeta.Finalizers, myFinalizerName)
+		if err := r.Update(context.Background(), instance); err != nil {
+			return reconcile.Result{}, err
 		}
 	}
+
+	api := SecurityPolicyAPI{Log: r.Log}
+	gceCurrentInstance, err := api.Get(ctx, instance.Spec.Name)
+	if gceCurrentInstance == nil {
+		log.Info("Create Security Policy")
+		if err := api.Create(ctx, &instance.Spec); err != nil {
+			return ctrl.Result{}, err
+		}
+	} else {
+		log.Info("Apply Security Policy")
+		if err := api.Apply(ctx, &instance.Spec, gceCurrentInstance); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	return ctrl.Result{}, nil
 }
 
@@ -77,4 +98,33 @@ func (r *SecurityPolicyReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&cloudarmorv1beta1.SecurityPolicy{}).
 		Complete(r)
+}
+
+//  delete dependency bucket.
+func (r *SecurityPolicyReconciler) deleteExternalDependency(instance *cloudarmorv1beta1.SecurityPolicy) error {
+	ctx := context.Background()
+	api := SecurityPolicyAPI{Log: r.Log}
+	err := api.Delete(ctx, instance.Spec.Name)
+	return err
+}
+
+// Helper functions to check string from a slice of strings.
+func containsString(slice []string, s string) bool {
+	for _, item := range slice {
+		if item == s {
+			return true
+		}
+	}
+	return false
+}
+
+// Helper functions to remove string from slice.
+func removeString(slice []string, s string) (result []string) {
+	for _, item := range slice {
+		if item == s {
+			continue
+		}
+		result = append(result, item)
+	}
+	return
 }

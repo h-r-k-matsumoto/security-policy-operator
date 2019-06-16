@@ -38,9 +38,6 @@ type SecurityPolicySpec struct {
 
 // SecurityPolicyStatus defines the observed state of SecurityPolicy
 type SecurityPolicyStatus struct {
-	// +kubebuilder:validation:MinLength=1
-	Description string                   `json:"description"`
-	Rules       []SecurityPolicySpecRule `json:"rules"`
 }
 
 // +kubebuilder:object:root=true

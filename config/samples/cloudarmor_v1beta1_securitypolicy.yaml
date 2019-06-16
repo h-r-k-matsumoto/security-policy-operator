@@ -9,8 +9,11 @@ spec:
   defaultAction: "deny(403)"
   rules:
     - action: "allow"
-      description: sample
-      priority: 1102
+      description: sample2
+      priority: 1103
       srcIpRanges:
         - "192.168.0.0/24"
+        - "192.168.1.0/24"
+
+
 
