@@ -40,16 +40,31 @@ This is a requirements to operate Security Policy Operator.
 Create a namespace to install Security Policy Operator.
 ```shell
 $ kubectl create namespace security-policy-operator-system
+namespace/security-policy-operator-system created
+$
 ```
 
 Create a secret from json file.
 ```
 $ kubectl create secret generic security-policy-operator-key -n security-policy-operator-system --from-file=key.json=PATH-TO-KEY-FILE.json
+secret/security-policy-operator-key created
+$ 
 ```
 
 Install Security Policy Operator.
 ```shell
 $ kubectl apply -f https://raw.githubusercontent.com/h-r-k-matsumoto/security-policy-operator/master/dist/install.yaml
+customresourcedefinition.apiextensions.k8s.io/securitypolicies.cloudarmor.matsumo.dev configured
+Warning: kubectl apply should be used on resource created by either kubectl create --save-config or kubectl apply
+namespace/security-policy-operator-system configured
+deployment.extensions/security-policy-operator-controller-manager created
+service/security-policy-operator-controller-manager-metrics-service created
+rolebinding.rbac.authorization.k8s.io/security-policy-operator-leader-election-rolebinding created
+clusterrole.rbac.authorization.k8s.io/security-policy-operator-manager-role created
+clusterrolebinding.rbac.authorization.k8s.io/security-policy-operator-manager-rolebinding created
+clusterrole.rbac.authorization.k8s.io/security-policy-operator-proxy-role created
+clusterrolebinding.rbac.authorization.k8s.io/security-policy-operator-proxy-rolebinding created
+$ 
 ```
 
 ## Easy to use
@@ -58,7 +73,6 @@ Create sample Security Policy.
 ```
 $ kubectl apply -f https://raw.githubusercontent.com/h-r-k-matsumoto/security-policy-operator/master/config/samples/cloudarmor_v1beta1_securitypolicy.yaml
 securitypolicy.cloudarmor.matsumo.dev "securitypolicy-sample" configured
-
 $
 ```
 
