@@ -83,9 +83,85 @@ $
 
 # Usecase
 
-## Whitelist management with  Kubernetes Custom Resource
+## Blacklist management with  Kubernetes Custom Resource
 
-T.B.D.
+```
+$ kubectl apply -f https://raw.githubusercontent.com/h-r-k-matsumoto/security-policy-operator/master/config/samples/cloudarmor-full-package.yaml
+namespace/cloud-armor-how-to created
+securitypolicy.cloudarmor.matsumo.dev/securitypolicy-sample created
+deployment.apps/my-deployment created
+backendconfig.cloud.google.com/my-backend-config created
+service/my-service created
+ingress.extensions/my-ingress created
+$
+``` 
 
+```
+$ kubectl get ingress -n cloud-armor-how-to
+NAME         HOSTS   ADDRESS                PORTS   AGE
+my-ingress   *       {INGRESS_IP_ADDRESS}   80      92s
+$ 
+```
 
+```
+$ curl http://${INGRESS_IP_ADDRESS}
+Hello, world!
+Version: 1.0.0
+Hostname: my-deployment-8445f8f8b6-rdtjg
+$ 
+```
 
+```
+$ gcloud beta compute security-policies describe ca-how-to-security-policy
+---
+description: policy for Google Cloud Armor how-to topic
+kind: compute#securityPolicy
+labelFingerprint: 42WmSpB8rSM=
+name: ca-how-to-security-policy
+rules:
+- action: deny(404)
+  description: Deny traffic from 192.0.2.0/24.
+  kind: compute#securityPolicyRule
+  match:
+    config:
+      srcIpRanges:
+      - 192.0.2.0/24
+    versionedExpr: SRC_IPS_V1
+  preview: false
+  priority: 1000
+- action: allow
+  description: This is default action
+  kind: compute#securityPolicyRule
+  match:
+    config:
+      srcIpRanges:
+      - '*'
+    versionedExpr: SRC_IPS_V1
+  preview: false
+  priority: 2147483647
+$
+```
+
+```
+$ kubectl describe  securitypolicy -n cloud-armor-how-to securitypolicy-sample
+Name:         securitypolicy-sample
+Namespace:    cloud-armor-how-to
+Labels:       <none>
+API Version:  cloudarmor.matsumo.dev/v1beta1
+Kind:         SecurityPolicy
+Metadata:
+ ...
+Spec:
+  Default Action:  allow
+  Description:     policy for Google Cloud Armor how-to topic
+  Name:            ca-how-to-security-policy
+  Rules:
+    Action:       deny(404)
+    Description:  Deny traffic from 192.0.2.0/24.
+    Priority:     1000
+    Src Ip Ranges:
+      192.0.2.0/24
+Status:
+Events:  <none>
+$
+```
