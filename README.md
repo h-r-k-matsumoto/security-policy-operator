@@ -39,7 +39,7 @@ This is a requirements to operate Security Policy Operator.
 
 Create a namespace to install Security Policy Operator.
 ```shell
-$ kubectl create namespace security-policy-operator-system
+$ kubectl apply -f https://raw.githubusercontent.com/h-r-k-matsumoto/security-policy-operator/master/dist/prepared.yaml
 namespace/security-policy-operator-system created
 $
 ```
