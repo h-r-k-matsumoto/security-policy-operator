@@ -508,7 +508,7 @@ spec:
       volumes:
       - name: google-cloud-key
         secret:
-          secretName: k8s-controller-key
+          secretName: security-policy-operator-key
 ---
 apiVersion: v1
 kind: Service
