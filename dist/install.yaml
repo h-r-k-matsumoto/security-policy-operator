@@ -429,16 +429,6 @@ spec:
     served: true
     storage: true
 ---
-apiVersion: v1
-kind: Namespace
-metadata:
-  labels:
-    control-plane: controller-manager
-  name: security-policy-operator-system
-spec:
-  finalizers:
-  - kubernetes
----
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:

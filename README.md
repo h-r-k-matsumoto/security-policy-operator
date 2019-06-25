@@ -54,9 +54,7 @@ $
 Install Security Policy Operator.
 ```shell
 $ kubectl apply -f https://raw.githubusercontent.com/h-r-k-matsumoto/security-policy-operator/master/dist/install.yaml
-customresourcedefinition.apiextensions.k8s.io/securitypolicies.cloudarmor.matsumo.dev configured
-Warning: kubectl apply should be used on resource created by either kubectl create --save-config or kubectl apply
-namespace/security-policy-operator-system configured
+customresourcedefinition.apiextensions.k8s.io/securitypolicies.cloudarmor.matsumo.dev created
 deployment.extensions/security-policy-operator-controller-manager created
 service/security-policy-operator-controller-manager-metrics-service created
 rolebinding.rbac.authorization.k8s.io/security-policy-operator-leader-election-rolebinding created
@@ -80,7 +78,6 @@ Delete sample Security Policy.
 ```
 $ kubectl delete -f https://raw.githubusercontent.com/h-r-k-matsumoto/security-policy-operator/master/config/samples/cloudarmor_v1beta1_securitypolicy.yaml
 securitypolicy.cloudarmor.matsumo.dev "securitypolicy-sample" deleted
-
 $
 ```
 
