@@ -14,3 +14,4 @@
 #
 .secret
 .DS_Store
+.vscode
