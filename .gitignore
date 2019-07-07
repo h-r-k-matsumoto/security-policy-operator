@@ -12,6 +12,7 @@
 *.out
 
 #
+bin
 .secret
 .DS_Store
 .vscode
