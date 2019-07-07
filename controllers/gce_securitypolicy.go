@@ -21,10 +21,10 @@ import (
 	"reflect"
 
 	"github.com/go-logr/logr"
-	cloudarmorv1beta1 "github.com/h-r-k-matsumoto/security-policy-operator/api/v1beta1"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/googleapi"
 
+	cloudarmorv1beta1 "github.com/h-r-k-matsumoto/security-policy-operator/api/v1beta1"
 	compute "google.golang.org/api/compute/v1"
 )
 
@@ -39,7 +39,6 @@ func (api *SecurityPolicyAPI) Get(ctx context.Context, name string) (*compute.Se
 	if err != nil {
 		return nil, err
 	}
-
 	policy, err := service.Get(credentials.ProjectID, name).Do()
 	if err != nil {
 		if e, ok := err.(*googleapi.Error); ok {
@@ -54,7 +53,7 @@ func (api *SecurityPolicyAPI) Get(ctx context.Context, name string) (*compute.Se
 }
 
 // Create calls Security Policy Insert API
-func (api *SecurityPolicyAPI) Create(ctx context.Context, spec *cloudarmorv1beta1.SecurityPolicySpec) error {
+func (api *SecurityPolicyAPI) Create(ctx context.Context, spec *cloudarmorv1beta1.SecurityPolicyStatus) error {
 	log := api.Log.WithValues("gcp_securitypolicy", spec.Name)
 
 	service, credentials, err := newSecurityPoliciesService(ctx)
@@ -72,7 +71,7 @@ func (api *SecurityPolicyAPI) Create(ctx context.Context, spec *cloudarmorv1beta
 }
 
 //
-func (api *SecurityPolicyAPI) Apply(ctx context.Context, spec *cloudarmorv1beta1.SecurityPolicySpec, current *compute.SecurityPolicy) error {
+func (api *SecurityPolicyAPI) Apply(ctx context.Context, spec *cloudarmorv1beta1.SecurityPolicyStatus, current *compute.SecurityPolicy) error {
 	log := api.Log.WithValues("gcp_securitypolicy", spec.Name)
 
 	update := customResourceToSecurityPolicy(spec)
@@ -171,8 +170,8 @@ func newSecurityPoliciesService(ctx context.Context) (*compute.SecurityPoliciesS
 	return computeService.SecurityPolicies, credentials, nil
 }
 
-// customResourceToSecurityPolicyRule convert cloudarmorv1beta1.SecurityPolicySpecRule to compute.SecurityPolicyRule
-func customResourceToSecurityPolicyRule(rule *cloudarmorv1beta1.SecurityPolicySpecRule) *compute.SecurityPolicyRule {
+// customResourceToSecurityPolicyRule convert cloudarmorv1beta1.SecurityPolicyRule to compute.SecurityPolicyRule
+func customResourceToSecurityPolicyRule(rule *cloudarmorv1beta1.SecurityPolicyRule) *compute.SecurityPolicyRule {
 	return &compute.SecurityPolicyRule{
 		Action:      rule.Action,
 		Description: rule.Description,
@@ -187,7 +186,7 @@ func customResourceToSecurityPolicyRule(rule *cloudarmorv1beta1.SecurityPolicySp
 }
 
 // defaultSecurityPolicyRule generates default security policy rule.
-func defaultSecurityPolicyRule(spec *cloudarmorv1beta1.SecurityPolicySpec) *compute.SecurityPolicyRule {
+func defaultSecurityPolicyRule(spec *cloudarmorv1beta1.SecurityPolicyStatus) *compute.SecurityPolicyRule {
 	return &compute.SecurityPolicyRule{
 		Action:      spec.DefaultAction,
 		Description: "This is default action",
@@ -201,8 +200,8 @@ func defaultSecurityPolicyRule(spec *cloudarmorv1beta1.SecurityPolicySpec) *comp
 	}
 }
 
-// customResourceToSecurityPolicy convert cloudarmorv1beta1.SecurityPolicySpec to compute.SecurityPolicy.
-func customResourceToSecurityPolicy(spec *cloudarmorv1beta1.SecurityPolicySpec) *compute.SecurityPolicy {
+// customResourceToSecurityPolicy convert cloudarmorv1beta1.SecurityPolicyStatus to compute.SecurityPolicy.
+func customResourceToSecurityPolicy(spec *cloudarmorv1beta1.SecurityPolicyStatus) *compute.SecurityPolicy {
 	rules := make([]*compute.SecurityPolicyRule, len(spec.Rules))
 	for i, _ := range rules {
 		rules[i] = customResourceToSecurityPolicyRule(&spec.Rules[i])

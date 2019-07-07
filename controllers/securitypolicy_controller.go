@@ -1,16 +1,16 @@
 /*
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+		http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
 */
 
 package controllers
@@ -19,12 +19,12 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
+	cloudarmorv1beta1 "github.com/h-r-k-matsumoto/security-policy-operator/api/v1beta1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	cloudarmorv1beta1 "github.com/h-r-k-matsumoto/security-policy-operator/api/v1beta1"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 // SecurityPolicyReconciler reconciles a SecurityPolicy object
@@ -33,14 +33,14 @@ type SecurityPolicyReconciler struct {
 	Log logr.Logger
 }
 
-// Reconcile logic.
+// Reconcile logic
 // +kubebuilder:rbac:groups=cloudarmor.matsumo.dev,resources=securitypolicies,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=cloudarmor.matsumo.dev,resources=securitypolicies/status,verbs=get;update;patch
 func (r *SecurityPolicyReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	log := r.Log.WithValues("securitypolicy", req.NamespacedName)
+	log.Info("Reconcile start.")
 
-	// Fetch the Gcs instance
 	instance := &cloudarmorv1beta1.SecurityPolicy{}
 
 	err := r.Get(ctx, req.NamespacedName, instance)
@@ -68,26 +68,35 @@ func (r *SecurityPolicyReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 		}
 		return ctrl.Result{}, nil
 	}
-
+	instance.Status.Name = instance.Spec.Name
+	instance.Status.Description = instance.Spec.Description
+	instance.Status.DefaultAction = instance.Spec.DefaultAction
+	instance.Status.Rules = instance.Spec.Rules
 	if !containsString(instance.ObjectMeta.Finalizers, myFinalizerName) {
 		instance.ObjectMeta.Finalizers = append(instance.ObjectMeta.Finalizers, myFinalizerName)
-		if err := r.Update(context.Background(), instance); err != nil {
-			return reconcile.Result{}, err
-		}
+	}
+	nodeCalculator := &NodeCalculator{Log: r.Log, Reconciler: r}
+	instance, err = nodeCalculator.Calculate(instance)
+	if err != nil {
+		return reconcile.Result{}, err
 	}
 
 	api := SecurityPolicyAPI{Log: r.Log}
-	gceCurrentInstance, err := api.Get(ctx, instance.Spec.Name)
+	gceCurrentInstance, err := api.Get(ctx, instance.Status.Name)
 	if gceCurrentInstance == nil {
 		log.Info("Create Security Policy")
-		if err := api.Create(ctx, &instance.Spec); err != nil {
+		if err := api.Create(ctx, &instance.Status); err != nil {
 			return ctrl.Result{}, err
 		}
 	} else {
 		log.Info("Apply Security Policy")
-		if err := api.Apply(ctx, &instance.Spec, gceCurrentInstance); err != nil {
+		if err := api.Apply(ctx, &instance.Status, gceCurrentInstance); err != nil {
 			return ctrl.Result{}, err
 		}
+	}
+
+	if err := r.Update(ctx, instance); err != nil {
+		return reconcile.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
@@ -104,7 +113,7 @@ func (r *SecurityPolicyReconciler) SetupWithManager(mgr ctrl.Manager) error {
 func (r *SecurityPolicyReconciler) deleteExternalDependency(instance *cloudarmorv1beta1.SecurityPolicy) error {
 	ctx := context.Background()
 	api := SecurityPolicyAPI{Log: r.Log}
-	err := api.Delete(ctx, instance.Spec.Name)
+	err := api.Delete(ctx, instance.Status.Name)
 	return err
 }
 

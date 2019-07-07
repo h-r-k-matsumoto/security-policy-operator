@@ -399,6 +399,18 @@ spec:
                     type: string
                   description:
                     type: string
+                  nodePoolSelectors:
+                    items:
+                      properties:
+                        key:
+                          type: string
+                        value:
+                          type: string
+                      required:
+                      - key
+                      - value
+                      type: object
+                    type: array
                   priority:
                     format: int64
                     type: integer
@@ -410,16 +422,52 @@ spec:
                 - action
                 - description
                 - priority
-                - srcIpRanges
                 type: object
               type: array
-          required:
-          - name
-          - description
-          - defaultAction
-          - rules
           type: object
         status:
+          properties:
+            condition:
+              type: string
+            defaultAction:
+              type: string
+            description:
+              type: string
+            name:
+              minLength: 1
+              type: string
+            rules:
+              items:
+                properties:
+                  action:
+                    type: string
+                  description:
+                    type: string
+                  nodePoolSelectors:
+                    items:
+                      properties:
+                        key:
+                          type: string
+                        value:
+                          type: string
+                      required:
+                      - key
+                      - value
+                      type: object
+                    type: array
+                  priority:
+                    format: int64
+                    type: integer
+                  srcIpRanges:
+                    items:
+                      type: string
+                    type: array
+                required:
+                - action
+                - description
+                - priority
+                type: object
+              type: array
           type: object
       type: object
   versions:

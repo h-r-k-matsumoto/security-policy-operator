@@ -22,6 +22,7 @@ import (
 	cloudarmorv1beta1 "github.com/h-r-k-matsumoto/security-policy-operator/api/v1beta1"
 	"github.com/h-r-k-matsumoto/security-policy-operator/controllers"
 	"k8s.io/apimachinery/pkg/runtime"
+	kscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -36,6 +37,7 @@ var (
 func init() {
 
 	cloudarmorv1beta1.AddToScheme(scheme)
+	kscheme.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -62,6 +64,14 @@ func main() {
 	err = (&controllers.SecurityPolicyReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("SecurityPolicy"),
+	}).SetupWithManager(mgr)
+	if err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "SecurityPolicy")
+		os.Exit(1)
+	}
+	err = (&controllers.SecurityPolicyNodeReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("SecurityPolicy(node)"),
 	}).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "SecurityPolicy")

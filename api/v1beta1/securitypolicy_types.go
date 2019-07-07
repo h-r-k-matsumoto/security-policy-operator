@@ -19,25 +19,37 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// SecurityPolicySpecRule defines rules
-type SecurityPolicySpecRule struct {
-	Action      string   `json:"action"`
-	Description string   `json:"description"`
-	Priority    int64    `json:"priority"`
-	SrcIpRanges []string `json:"srcIpRanges"`
+type LabelSelectors struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// SecurityPolicyRule defines rules
+type SecurityPolicyRule struct {
+	Action            string           `json:"action"`
+	Description       string           `json:"description"`
+	Priority          int64            `json:"priority"`
+	SrcIpRanges       []string         `json:"srcIpRanges,omitempty"`
+	NodePoolSelectors []LabelSelectors `json:"nodePoolSelectors,omitempty"`
 }
 
 // SecurityPolicySpec defines the desired state of SecurityPolicy
 type SecurityPolicySpec struct {
 	// +kubebuilder:validation:MinLength=1
-	Name          string                   `json:"name"`
-	Description   string                   `json:"description"`
-	DefaultAction string                   `json:"defaultAction"`
-	Rules         []SecurityPolicySpecRule `json:"rules"`
+	Name          string               `json:"name,omitempty"`
+	Description   string               `json:"description,omitempty"`
+	DefaultAction string               `json:"defaultAction,omitempty"`
+	Rules         []SecurityPolicyRule `json:"rules,omitempty"`
 }
 
 // SecurityPolicyStatus defines the observed state of SecurityPolicy
 type SecurityPolicyStatus struct {
+	// +kubebuilder:validation:MinLength=1
+	Name          string               `json:"name,omitempty"`
+	Description   string               `json:"description,omitempty"`
+	DefaultAction string               `json:"defaultAction,omitempty"`
+	Rules         []SecurityPolicyRule `json:"rules,omitempty"`
+	Condition     string               `json:"condition,omitempty"`
 }
 
 // +kubebuilder:object:root=true
