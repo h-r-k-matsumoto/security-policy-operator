@@ -36,6 +36,8 @@ type SecurityPolicyReconciler struct {
 // Reconcile logic
 // +kubebuilder:rbac:groups=cloudarmor.matsumo.dev,resources=securitypolicies,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=cloudarmor.matsumo.dev,resources=securitypolicies/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups="",resources=node,verbs=get;list;watch
+
 func (r *SecurityPolicyReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	log := r.Log.WithValues("securitypolicy", req.NamespacedName)

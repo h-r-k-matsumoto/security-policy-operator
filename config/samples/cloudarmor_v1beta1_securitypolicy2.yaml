@@ -1,0 +1,25 @@
+apiVersion: cloudarmor.matsumo.dev/v1beta1
+kind: SecurityPolicy
+metadata:
+  name: securitypolicy-sample
+spec:
+  description: test2
+  name: test
+  defaultAction: "deny(403)"
+  rules:
+    - action: "allow"
+      description: "this is sample rule 1."
+      priority: 100
+      srcIpRanges:
+        - "192.168.0.0/24"
+        - "192.168.1.0/24"
+        - "192.168.2.1"
+    - action: "allow"
+      description: "this is gke node pool"
+      priority: 101
+      nodePoolSelectors:
+      - key: cloud.google.com/gke-nodepool
+        value: pool-2
+
+
+
