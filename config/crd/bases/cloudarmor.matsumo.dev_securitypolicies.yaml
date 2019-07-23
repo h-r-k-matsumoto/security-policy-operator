@@ -386,18 +386,26 @@ spec:
         spec:
           properties:
             defaultAction:
+              enum:
+              - deny(403)
+              - deny(404)
+              - deny(502)
               type: string
             description:
+              minLength: 1
               type: string
             name:
+              maxLength: 63
               minLength: 1
               type: string
             rules:
               items:
                 properties:
                   action:
+                    minLength: 1
                     type: string
                   description:
+                    minLength: 1
                     type: string
                   nodePoolSelectors:
                     items:
@@ -424,6 +432,10 @@ spec:
                 - priority
                 type: object
               type: array
+          required:
+          - name
+          - description
+          - defaultAction
           type: object
         status:
           properties:
@@ -434,14 +446,15 @@ spec:
             description:
               type: string
             name:
-              minLength: 1
               type: string
             rules:
               items:
                 properties:
                   action:
+                    minLength: 1
                     type: string
                   description:
+                    minLength: 1
                     type: string
                   nodePoolSelectors:
                     items:
