@@ -17,6 +17,7 @@ package controllers
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-logr/logr"
 	cloudarmorv1beta1 "github.com/h-r-k-matsumoto/security-policy-operator/api/v1beta1"
@@ -84,21 +85,33 @@ func (r *SecurityPolicyReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 	}
 
 	api := SecurityPolicyAPI{Log: r.Log}
-	gceCurrentInstance, err := api.Get(ctx, instance.Status.Name)
-	if gceCurrentInstance == nil {
-		log.Info("Create Security Policy")
-		if err := api.Create(ctx, &instance.Status); err != nil {
-			return ctrl.Result{}, err
-		}
-	} else {
-		log.Info("Apply Security Policy")
-		if err := api.Apply(ctx, &instance.Status, gceCurrentInstance); err != nil {
-			return ctrl.Result{}, err
-		}
+	err = retry(
+		func() error {
+			gceCurrentInstance, err := api.Get(ctx, instance.Status.Name)
+			if err != nil {
+				return err
+			}
+			if gceCurrentInstance == nil {
+				log.Info("Create Security Policy")
+				if err := api.Create(ctx, &instance.Status); err != nil {
+					return err
+				}
+			} else {
+				log.Info("Apply Security Policy")
+				if err := api.Apply(ctx, &instance.Status, gceCurrentInstance); err != nil {
+					return err
+				}
+			}
+			return nil
+		},
+	)
+	if err != nil {
+		return ctrl.Result{}, err
 	}
 
+	instance.Status.Condition = "security operator updated."
 	if err := r.Update(ctx, instance); err != nil {
-		return reconcile.Result{}, err
+		return reconcile.Result{RequeueAfter: 5 * time.Second}, err
 	}
 
 	return ctrl.Result{}, nil
@@ -138,4 +151,22 @@ func removeString(slice []string, s string) (result []string) {
 		result = append(result, item)
 	}
 	return
+}
+
+func retry(fn func() error) error {
+	i := 3
+	sleepTime := 1 * time.Second
+	var err error = nil
+	for i > 0 {
+		if err = fn(); err != nil {
+			i--
+			if i > 0 {
+				time.Sleep(sleepTime)
+				continue
+			}
+			return err
+		}
+		return nil
+	}
+	return err
 }
