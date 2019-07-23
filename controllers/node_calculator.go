@@ -17,6 +17,7 @@ package controllers
 
 import (
 	"context"
+	"sort"
 
 	"github.com/go-logr/logr"
 	cloudarmorv1beta1 "github.com/h-r-k-matsumoto/security-policy-operator/api/v1beta1"
@@ -67,5 +68,6 @@ func (n *NodeCalculator) List(labels map[string]string) ([]string, error) {
 			}
 		}
 	}
+	sort.Strings(addresses)
 	return addresses, nil
 }

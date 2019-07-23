@@ -41,7 +41,6 @@ type SecurityPolicyNodeReconciler struct {
 func (r *SecurityPolicyNodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	log := r.Log.WithValues("securitypolicy(node)", req.NamespacedName)
-	log.Info("Reconcile start.")
 
 	instance := &cloudarmorv1beta1.SecurityPolicyList{}
 
@@ -53,8 +52,12 @@ func (r *SecurityPolicyNodeReconciler) Reconcile(req ctrl.Request) (ctrl.Result,
 		return ctrl.Result{}, err
 	}
 	for _, policy := range instance.Items {
+		if policy.Status.Condition == "node event update" {
+			continue
+		}
 		for _, rule := range policy.Spec.Rules {
 			if rule.NodePoolSelectors != nil && len(rule.NodePoolSelectors) > 0 {
+				log.Info("fired security policy event.")
 				policy.Status.Condition = "node event update"
 				if err := r.Update(ctx, &policy); err != nil {
 					return reconcile.Result{}, err
