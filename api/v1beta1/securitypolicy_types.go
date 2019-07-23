@@ -26,7 +26,9 @@ type LabelSelectors struct {
 
 // SecurityPolicyRule defines rules
 type SecurityPolicyRule struct {
-	Action            string           `json:"action"`
+	// +kubebuilder:validation:MinLength=1
+	Action string `json:"action"`
+	// +kubebuilder:validation:MinLength=1
 	Description       string           `json:"description"`
 	Priority          int64            `json:"priority"`
 	SrcIpRanges       []string         `json:"srcIpRanges,omitempty"`
@@ -35,16 +37,18 @@ type SecurityPolicyRule struct {
 
 // SecurityPolicySpec defines the desired state of SecurityPolicy
 type SecurityPolicySpec struct {
+	// +kubebuilder:validation:MaxLength=63
 	// +kubebuilder:validation:MinLength=1
-	Name          string               `json:"name,omitempty"`
-	Description   string               `json:"description,omitempty"`
-	DefaultAction string               `json:"defaultAction,omitempty"`
+	Name string `json:"name"`
+	// +kubebuilder:validation:MinLength=1
+	Description string `json:"description"`
+	// +kubebuilder:validation:Enum=deny(403);deny(404);deny(502)
+	DefaultAction string               `json:"defaultAction"`
 	Rules         []SecurityPolicyRule `json:"rules,omitempty"`
 }
 
 // SecurityPolicyStatus defines the observed state of SecurityPolicy
 type SecurityPolicyStatus struct {
-	// +kubebuilder:validation:MinLength=1
 	Name          string               `json:"name,omitempty"`
 	Description   string               `json:"description,omitempty"`
 	DefaultAction string               `json:"defaultAction,omitempty"`

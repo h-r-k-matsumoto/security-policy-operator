@@ -57,7 +57,13 @@ var _ = Describe("SecurityPolicy", func() {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
-				}}
+				},
+				Spec: SecurityPolicySpec{
+					Name:          "name",
+					Description:   "description",
+					DefaultAction: "deny(403)",
+				},
+			}
 
 			By("creating an API obj")
 			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
