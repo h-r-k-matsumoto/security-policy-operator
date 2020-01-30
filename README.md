@@ -1,5 +1,9 @@
 # Security Policy Operator
 
+**IMPORTANT: Currently,[Config Connector](https://cloud.google.com/config-connector/docs/reference/resources?hl=ja#computesecuritypolicy) is available.
+You shoud use to it.**
+
+
 The Goal is to opearation [Google Cloud Armor Security Policies](https://cloud.google.com/armor/) as a resource of Kubernetes.<br>
 Manage SecurityPolicy without using gcloud command.
 
